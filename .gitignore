@@ -3,3 +3,10 @@ packer_cache/
 
 # For built boxes
 *.box
+
+# For qemu / vmware / virtualbox raw images
+output-*
+
+# For docker images
+*.tar
+

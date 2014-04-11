@@ -1,0 +1,76 @@
+{
+  "variables": {
+    "box_ostype":     "centos",
+    "box_osversion":  "6.5",
+    "box_nick":       "6.5",
+    "box_arch":       "x64",
+    "box_type":       "base",
+    "box_memory":     "512",
+    "box_cpus":       "1",
+
+    "iso_arch":       "x86_64",
+    "iso_type":       "netinstall",
+    "iso_md5":        "939fd1d87c11ffe7795324438b85adfb",
+
+    "ssh_user":       "vagrant",
+    "ssh_pass":       "vagrant",
+    "hostname":       "vagrant-centos-6.5",
+    "domain":         "vagrantup.com"
+  },
+
+  "builders": [
+    {
+      "type":               "vmware-iso",
+      "vm_name":            "{{ user `box_ostype` }}-{{ user `box_nick` }}-{{ user `box_arch` }}-{{ user `box_type` }}",
+      "guest_os_type":      "centos",
+      "disk_size":          "4096",
+
+      "iso_url":            "http://mirror.globo.com/centos/{{ user `box_osversion` }}/isos/{{ user `iso_arch` }}/CentOS-{{ user `box_osversion` }}-{{ user `iso_arch` }}-{{ user `iso_type` }}.iso",
+      "iso_checksum":       "{{ user `iso_md5` }}",
+      "iso_checksum_type":  "md5",
+
+      "http_directory":     "http",
+
+      "ssh_username":       "root",
+      "ssh_password":       "{{ user `ssh_pass` }}",
+      "ssh_wait_timeout":   "100000s",
+
+      "shutdown_command":   "echo {{ user `ssh_user` }} | sudo halt -p",
+
+      "boot_command": [
+        "<tab> ",
+        "text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks-{{ user `box_osversion` }}.cfg ",
+        "lang=en_US.UTF-8 ",
+        "<enter><wait>"
+      ],
+
+      "vmx_data": {
+        "memsize":  "512",
+        "numvcpus": "2"
+      }
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "echo 'root' | sh '{{ .Path }}'",
+      "scripts": [
+        "scripts/locale.sh",
+        "scripts/elrepo.sh",
+        "scripts/qemu.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "pause_before": "30s",
+      "execute_command": "echo 'root' | sh '{{ .Path }}'",
+      "scripts": [
+        "scripts/common/sshd.sh",
+        "scripts/common/sudoers.sh",
+        "scripts/common/vagrant.sh",
+        "scripts/common/packer.sh"
+      ]
+    }
+  ]
+}
