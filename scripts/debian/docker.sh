@@ -2,7 +2,7 @@
 
 apt-get update > /dev/null
 
-apt-get install --yes --force-yes docker.io
+DEBIAN_FRONTEND=noninteractive apt-get install --yes --force-yes docker.io
 
 update-alternatives --install /usr/bin/docker docker.io /usr/bin/docker.io 1
 
