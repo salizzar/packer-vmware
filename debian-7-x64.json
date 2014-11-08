@@ -1,20 +1,20 @@
 {
   "variables": {
     "box_ostype":     "debian",
-    "box_osversion":  "7.4.0",
-    "box_nick":       "wheezy",
+    "box_osversion":  "7.7.0",
+    "box_nick":       "7",
     "box_arch":       "x64",
     "box_type":       "base",
-    "box_memory":     "786",
+    "box_memory":     "2048",
     "box_cpus":       "2",
 
     "iso_arch":       "amd64",
     "iso_type":       "netinst",
-    "iso_md5":        "e7e9433973f082a297793c3c5010b2c5",
+    "iso_md5":        "0b31bccccb048d20b551f70830bb7ad0",
 
     "ssh_user":       "vagrant",
     "ssh_pass":       "vagrant",
-    "hostname":       "vagrant-debian-7.4.0",
+    "hostname":       "vagrant-debian-7",
     "domain":         "vagrantup.com"
   },
 
@@ -24,6 +24,7 @@
       "vm_name":            "{{ user `box_ostype` }}-{{ user `box_osversion` }}-{{ user `box_arch` }}-{{ user `box_type` }}-vmw",
       "guest_os_type":      "debian7-64",
       "disk_size":          "10000",
+      "output_directory":   "output-vmware/{{ user `box_ostype` }}-{{ user `box_nick` }}",
 
       "iso_url":            "http://cdimage.debian.org/cdimage/release/{{ user `box_osversion` }}/{{ user `iso_arch` }}/iso-cd/debian-{{ user `box_osversion` }}-{{ user `iso_arch` }}-{{ user `iso_type` }}.iso",
       "iso_checksum":       "{{ user `iso_md5` }}",
@@ -36,6 +37,8 @@
       "ssh_wait_timeout":   "100000s",
 
       "shutdown_command":   "echo {{ user `ssh_user` }} | sudo halt -p",
+
+      "tools_upload_flavor": "linux",
 
       "boot_command": [
         "<esc><esc> ",
@@ -58,24 +61,14 @@
       ],
 
       "vmx_data": {
-        "memsize":  "{{ user `box_memory` }}",
-        "numvcpus": "{{ user `box_cpus`   }}"
+        "memsize":                    "{{ user `box_memory` }}",
+        "numvcpus":                   "{{ user `box_cpus`   }}",
+        "vhv.enable":                 "true"
       }
     }
   ],
 
   "provisioners": [
-    {
-      "type":             "shell",
-      "execute_command":  "echo 'root' | sh '{{ .Path }}'",
-      "scripts": [
-        "scripts/common/sshd.sh",
-        "scripts/common/sudoers.sh",
-        "scripts/common/vagrant.sh",
-        "scripts/common/packer.sh",
-        "scripts/debian/qemu.sh"
-      ]
-    },
     {
       "type":         "file",
       "source":       "files/debian/backports.list",
@@ -87,6 +80,11 @@
       "destination":  "/etc/apt/sources.list.d/sid.list"
     },
     {
+      "type":         "file",
+      "source":       "files/debian/salt.list",
+      "destination":  "/etc/apt/sources.list.d/salt.list"
+    },
+    {
       "type":             "shell",
       "execute_command":  "echo 'root' | sh '{{ .Path }}'",
       "script":           "scripts/debian/update_kernel.sh"
@@ -95,16 +93,27 @@
       "type":             "shell",
       "execute_command":  "echo 'root' | sh '{{ .Path }}'",
       "pause_before":     "30s",
-      "script":           "scripts/debian/docker.sh"
-    },
-    {
-      "type":             "shell",
-      "execute_command":  "echo 'root' | sh '{{ .Path }}'",
-      "inline":           [ "DEBIAN_FRONTEND=false apt-get install --yes --force-yes gnome" ]
+      "scripts": [
+        "scripts/common/vmware-tools.sh",
+        "scripts/common/sshd.sh",
+        "scripts/common/sudoers.sh",
+        "scripts/common/vagrant.sh",
+        "scripts/common/packer.sh",
+        "scripts/debian/qemu.sh",
+        "scripts/debian/docker.sh",
+        "scripts/debian/puppet.sh",
+        "scripts/debian/chef.sh",
+        "scripts/debian/salt.sh",
+        "scripts/debian/ansible.sh"
+      ]
     },
     {
       "type":   "shell",
-      "inline": [ "apt-get clean " ]
+      "inline": [
+        "apt-get clean -y",
+        "apt-get autoclean -y",
+        "apt-get autoremove --purge -y"
+      ]
     }
   ]
 }
