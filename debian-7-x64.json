@@ -1,5 +1,6 @@
 {
   "variables": {
+    "box_os":         "linux",
     "box_ostype":     "debian",
     "box_osversion":  "7.7.0",
     "box_nick":       "7",
@@ -24,7 +25,7 @@
       "vm_name":            "{{ user `box_ostype` }}-{{ user `box_osversion` }}-{{ user `box_arch` }}-{{ user `box_type` }}-vmw",
       "guest_os_type":      "debian7-64",
       "disk_size":          "10000",
-      "output_directory":   "output-vmware/{{ user `box_ostype` }}-{{ user `box_nick` }}",
+      "output_directory":   "output-vmware/{{ user `box_os` }}/{{ user `box_ostype` }}/{{ user `box_osversion` }}",
 
       "iso_url":            "http://cdimage.debian.org/cdimage/release/{{ user `box_osversion` }}/{{ user `iso_arch` }}/iso-cd/debian-{{ user `box_osversion` }}-{{ user `iso_arch` }}-{{ user `iso_type` }}.iso",
       "iso_checksum":       "{{ user `iso_md5` }}",
@@ -39,6 +40,12 @@
       "shutdown_command":   "echo {{ user `ssh_user` }} | sudo halt -p",
 
       "tools_upload_flavor": "linux",
+
+      "vmx_data": {
+        "memsize":                    "{{ user `box_memory` }}",
+        "numvcpus":                   "{{ user `box_cpus`   }}",
+        "vhv.enable":                 "true"
+      },
 
       "boot_command": [
         "<esc><esc> ",
@@ -58,13 +65,7 @@
         "passwd/user-password-again={{ user `ssh_pass` }} ",
         "partman-auto/disk string /dev/sda",
         "<enter><wait>"
-      ],
-
-      "vmx_data": {
-        "memsize":                    "{{ user `box_memory` }}",
-        "numvcpus":                   "{{ user `box_cpus`   }}",
-        "vhv.enable":                 "true"
-      }
+      ]
     }
   ],
 
