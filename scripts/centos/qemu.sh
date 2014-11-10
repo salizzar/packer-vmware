@@ -1,4 +1,4 @@
 #! /usr/bin/env bash
 
-yum install -y qemu kvm qemu-kvm kmod-kvm
+yum install -y kvm qemu-kvm
 

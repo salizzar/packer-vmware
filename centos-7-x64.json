@@ -1,0 +1,84 @@
+{
+  "variables": {
+    "box_os":         "linux",
+    "box_ostype":     "centos",
+    "box_osversion":  "7.0-1406",
+    "box_nick":       "7",
+    "box_arch":       "x64",
+    "box_type":       "base",
+    "box_memory":     "2048",
+    "box_cpus":       "2",
+
+    "iso_arch":       "x86_64",
+    "iso_type":       "NetInstall",
+    "iso_md5":        "96de4f38a2f07da51831153549c8bd0c",
+
+    "ssh_user":       "vagrant",
+    "ssh_pass":       "vagrant",
+    "hostname":       "vagrant-centos-7",
+    "domain":         "vagrantup.com"
+  },
+
+  "builders": [
+    {
+      "type":               "vmware-iso",
+      "vm_name":            "{{ user `box_ostype` }}-{{ user `box_osversion` }}-{{ user `box_arch` }}-{{ user `box_type` }}",
+      "guest_os_type":      "centos",
+      "disk_size":          "10000",
+      "output_directory":   "output-vmware/{{ user `box_os` }}/{{ user `box_ostype` }}/{{ user `box_osversion` }}",
+
+      "iso_url":            "http://mirror.globo.com/centos/{{ user `box_nick` }}/isos/{{ user `iso_arch` }}/CentOS-{{ user `box_osversion` }}-{{ user `iso_arch` }}-{{ user `iso_type` }}.iso",
+      "iso_checksum":       "{{ user `iso_md5` }}",
+      "iso_checksum_type":  "md5",
+
+      "http_directory":     "http",
+
+      "ssh_username":       "root",
+      "ssh_password":       "{{ user `ssh_pass` }}",
+      "ssh_wait_timeout":   "100000s",
+
+      "shutdown_command":   "echo {{ user `ssh_user` }} | sudo halt -p",
+
+      "tools_upload_flavor": "linux",
+
+      "vmx_data": {
+        "memsize":                    "{{ user `box_memory` }}",
+        "numvcpus":                   "{{ user `box_cpus` }}",
+        "vhv.enable":                 "true"
+      },
+
+      "boot_command": [
+        "<tab> ",
+        "text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks-{{ user `box_osversion` }}.cfg ",
+        "lang=en_US.UTF-8 ",
+        "<enter><wait>"
+      ]
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "pause_before": "30s",
+      "execute_command": "echo 'root' | sh '{{ .Path }}'",
+      "scripts": [
+        "scripts/common/vmware-tools.sh",
+        "scripts/common/sshd.sh",
+        "scripts/common/sudoers.sh",
+        "scripts/common/vagrant.sh",
+        "scripts/centos/locale.sh",
+        "scripts/centos/elrepo.sh",
+        "scripts/centos/puppet.sh",
+        "scripts/centos/chef.sh",
+        "scripts/centos/salt.sh",
+        "scripts/centos/ansible.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "yum clean"
+      ]
+    }
+  ]
+}
