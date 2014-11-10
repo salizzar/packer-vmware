@@ -1,5 +1,3 @@
-#! /usr/bin/env bash
-
 VMWARE_TOOLS_ISO=/root/linux.iso
 VMWARE_TOOLS_DIR=/mnt
 VMWARE_TOOLS_TMP=/tmp/vmfusion
